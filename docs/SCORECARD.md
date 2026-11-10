@@ -22,4 +22,6 @@
 - Stage 3 (depth/free space): NOT STARTED (needs a quantized depth model + device).
 - Stage 4: step detector, orientation/roll helper, sway estimator, height-from-walking math = library + unit tests (not run). NOT wired into the service: roll is not applied to frames, sway is not fed to range fusion, no calibration UI. Thresholds ASSUMED.
 - Stage 8 (partial): thermal frame-skipping + spoken hot warning wired in the service (thresholds ASSUMED, UNVERIFIED on device). OEM survival, battery-optimization prompt, crash recovery: NOT STARTED.
-- Stages 5, 6, 7, 9 (voice, navigation/OCR, personal assistant, evidence harness): NOT STARTED (docs/templates only).
+- Stage 5 (partial): text-to-command parser (en/hi/te) + unit tests (not run). No wake word, no speech recognition, no actions wired. Hindi/Telugu phrases NEEDS NATIVE REVIEW.
+- Stage 9 (partial): Python tools for metrics.csv summary, distance benchmark, confusion matrix/per-class recall, ablation plan; 5 Python unit tests PASSED locally (VERIFIED, tooling only; says nothing about the app). Ablation has no runner because replay mode is not implemented. Paper/slides/protocol hold PENDING FIELD DATA.
+- Stages 6, 7 (navigation/OCR, personal assistant): NOT STARTED.
