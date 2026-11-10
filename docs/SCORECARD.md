@@ -25,4 +25,5 @@
 - Stage 8 (partial): thermal frame-skipping + spoken hot warning wired in the service (thresholds ASSUMED, UNVERIFIED on device). OEM survival, battery-optimization prompt, crash recovery: NOT STARTED.
 - Stage 5 (partial): text-to-command parser (en/hi/te) + unit tests (not run). No wake word, no speech recognition, no actions wired. Hindi/Telugu phrases NEEDS NATIVE REVIEW.
 - Stage 9 (partial): Python tools for metrics.csv summary, distance benchmark, confusion matrix/per-class recall, ablation plan; 5 Python unit tests PASSED locally (VERIFIED, tooling only; says nothing about the app). Ablation runner = tools/ablation/run_gradle.sh (needs a tape + Gradle; never run). Paper/slides/protocol hold PENDING FIELD DATA.
-- Stages 6, 7 (navigation/OCR, personal assistant): NOT STARTED.
+- Stage 7 (partial, logic only, NOT wired into the service, tests not run): fall detector, SOS countdown, adaptive verbosity (critical never suppressed; quiet only suggested, never auto-applied), on-device place store, daily summary. NOT implemented: face memory (needs consent UI + biometric-privacy review), caregiver link and SOS delivery (needs SMS/network permission and explicit opt-in), GPS capture, low-battery alerts, UI, persistence. Fall thresholds ASSUMED.
+- Stage 6 (navigation/OCR): NOT STARTED.
