@@ -67,6 +67,7 @@ class Speech(ctx: Context, var lang: String) {
     @Volatile private var running = true
     @Volatile private var current: Item? = null
     @Volatile private var latch = CountDownLatch(0)
+    private var voiceWarned = false
 
     init {
         tts = TextToSpeech(ctx.applicationContext) { st ->
@@ -110,7 +111,13 @@ class Speech(ctx: Context, var lang: String) {
             current = it
             try {
                 val loc = when (it.lang) { "hi" -> Locale("hi", "IN"); "te" -> Locale("te", "IN"); else -> Locale("en", "IN") }
-                tts?.language = loc
+                val r = tts?.setLanguage(loc)
+                if ((r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) && !voiceWarned) {
+                    voiceWarned = true
+                    tts?.language = Locale("en", "IN")
+                    tts?.speak(I18n.t("en", "voice_missing"), TextToSpeech.QUEUE_FLUSH, null, "vm")
+                    latch.await(8, TimeUnit.SECONDS)
+                }
                 latch = CountDownLatch(1)
                 tts?.speak(it.text, TextToSpeech.QUEUE_FLUSH, null, "u${it.seq}")
                 latch.await(8, TimeUnit.SECONDS)

@@ -47,5 +47,5 @@ object Cfg {
     val VEHICLES = setOf("bicycle", "car", "motorcycle", "bus", "truck")
     val DYNAMIC = VEHICLES + setOf("person", "dog", "cat", "cow", "horse")
     val GROUND_HAZARDS = setOf("stairs", "steps", "pothole", "open drain", "manhole", "curb") // for a future fine-tuned model
-    val NAV = DIMS.keys + setOf("backpack", "stop sign", "parking meter", "tv")
+    val NAV: Set<String> = DIMS.keys   // labels without DIMS cannot be ranged, so they are not alerted
 }

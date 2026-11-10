@@ -3,6 +3,8 @@ package com.kaleem.blindassist
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -51,6 +53,7 @@ class AssistService : LifecycleService() {
     @Volatile private var pipeline: Pipeline? = null
     private var wake: PowerManager.WakeLock? = null
     private var session: MediaSession? = null
+    private var metrics: MetricsLogger? = null
 
     @Volatile private var lastFrameT = 0.0
     @Volatile private var armedAt = Double.MAX_VALUE
@@ -69,14 +72,17 @@ class AssistService : LifecycleService() {
         Cfg.lang = sp.getString("lang", "en") ?: "en"
         Cfg.camHeightM = sp.getFloat("height_cm", 110f) / 100.0
         startFg()
+        metrics = try { MetricsLogger(java.io.File(filesDir, "metrics.csv")) } catch (e: Exception) { null }
         speech = Speech(this, Cfg.lang)
         earcons = Earcons()
         sensors = PocketSensors(this).also { it.start() }
         wake = (getSystemService(Context.POWER_SERVICE) as PowerManager)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "blindassist:run").also { it.acquire(4 * 60 * 60 * 1000L) }
-        detector = try { Detector(this) } catch (e: Throwable) {
-            Log.e("BA", "detector init failed", e)
-            speech?.say(I18n.t(lang, "no_model"), P_CRITICAL, 10.0); stopSelf(); return
+        detector = createDetector(this)
+        if (detector?.limited == true) {
+            speech?.say(I18n.t(lang, "limited_mode"), P_CRITICAL, 15.0, "limited")
+            vibrateOnce(this)
+            main.postDelayed(limitedNag, 60_000)
         }
         speech?.say(I18n.t(lang, "starting"), P_ANSWER, 30.0, "start")
         armedAt = nowS() + 10.0
@@ -151,9 +157,22 @@ class AssistService : LifecycleService() {
             val evs = p.process(det.detect(up), now, up.width.toDouble(), up.height.toDouble(), sen.pitchDeg())
             dispatch(evs, now)
             val ms = SystemClock.elapsedRealtime() - t0
+            logMetrics(now, ms.toDouble())
             slowCount = if (ms > 450) slowCount + 1 else 0
             if (slowCount == 5 && now >= armedAt) speech?.say(I18n.t(lang, "slow"), P_ANSWER, 5.0, "slow")
         } catch (e: Throwable) { Log.e("BA", "analyze", e) } finally { img.close() }
+    }
+
+    private fun logMetrics(now: Double, ms: Double) {
+        val m = metrics ?: return
+        try {
+            val i = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val temp = (i?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE) ?: Int.MIN_VALUE)
+                .let { if (it == Int.MIN_VALUE) Double.NaN else it / 10.0 }
+            val lvl = i?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+            val scale = i?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
+            m.frame(now, ms, temp, if (lvl < 0) -1 else lvl * 100 / scale, detector?.limited == true)
+        } catch (_: Exception) {}
     }
 
     private fun dispatch(evs: List<Ev>, now: Double) {
@@ -178,6 +197,15 @@ class AssistService : LifecycleService() {
             if (now - darkSince > 2 && now - lastWarnT > 10) { lastWarnT = now; speech?.say(I18n.t(lang, "covered"), P_ANSWER, 5.0, "covered") }
         } else darkSince = 0.0
         if (abs(pitch) > 55 && now - lastWarnT > 10) { lastWarnT = now; speech?.say(I18n.t(lang, "not_upright"), P_ANSWER, 5.0, "upright") }
+    }
+
+    /** In limited mode (no detector) repeat the warning every minute: the user must never forget it is blind. */
+    private val limitedNag = object : Runnable {
+        override fun run() {
+            speech?.say(I18n.t(lang, "limited_mode"), P_CRITICAL, 15.0, "limited")
+            vibrateOnce(this@AssistService)
+            main.postDelayed(this, 60_000)
+        }
     }
 
     private val watchdog = object : Runnable {

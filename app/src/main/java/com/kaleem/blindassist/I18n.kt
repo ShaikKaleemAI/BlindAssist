@@ -5,6 +5,9 @@ import kotlin.math.roundToInt
 
 /** NOTE: Hindi/Telugu wording has not been reviewed by a native speaker - please review before real use. */
 object I18n {
+    /** Hindi and Telugu strings are machine-drafted. NEEDS NATIVE REVIEW before any real-world use. */
+    const val NEEDS_NATIVE_REVIEW = true
+
     private val S = mapOf(
         "en" to mapOf(
             "step" to "{n} step", "steps" to "{n} steps",
@@ -18,6 +21,8 @@ object I18n {
             "ready" to "Ready.", "stopped" to "Blind assist stopped.",
             "covered" to "Camera is covered. Adjust the phone.", "not_upright" to "Phone is not upright. Adjust it.",
             "no_model" to "Detection model missing. Cannot start.",
+            "limited_mode" to "Warning. Limited mode. The object detector is not loaded. I cannot see obstacles. Use your cane.",
+            "voice_missing" to "The voice for your language is not installed. Spoken alerts may be wrong. Use your cane.",
             "left" to "left", "right" to "right", "slight_left" to "slightly left", "slight_right" to "slightly right",
             "ahead" to "ahead", "far_left" to "far left", "far_right" to "far right"),
         "hi" to mapOf(
@@ -32,6 +37,7 @@ object I18n {
             "ready" to "तैयार।", "stopped" to "ब्लाइंड असिस्ट बंद।",
             "covered" to "कैमरा ढका हुआ है। फ़ोन ठीक कीजिए।", "not_upright" to "फ़ोन सीधा नहीं है। ठीक कीजिए।",
             "no_model" to "मॉडल नहीं मिला। शुरू नहीं हो सकता।",
+            "limited_mode" to "चेतावनी। सीमित मोड। वस्तु पहचान चालू नहीं है। मुझे रुकावटें नहीं दिख रहीं। छड़ी का इस्तेमाल कीजिए।",
             "left" to "बाएं", "right" to "दाएं", "slight_left" to "थोड़ा बाएं", "slight_right" to "थोड़ा दाएं",
             "ahead" to "सामने", "far_left" to "बहुत बाएं", "far_right" to "बहुत दाएं"),
         "te" to mapOf(
@@ -46,6 +52,7 @@ object I18n {
             "ready" to "సిద్ధం.", "stopped" to "బ్లైండ్ అసిస్ట్ ఆగింది.",
             "covered" to "కెమెరా కప్పబడింది. ఫోన్‌ను సరిచేయండి.", "not_upright" to "ఫోన్ నిటారుగా లేదు. సరిచేయండి.",
             "no_model" to "మోడల్ లేదు. మొదలుపెట్టలేను.",
+            "limited_mode" to "హెచ్చరిక. పరిమిత మోడ్. వస్తువులను గుర్తించే మోడల్ లోడ్ కాలేదు. నాకు అడ్డంకులు కనిపించడం లేదు. కర్రను వాడండి.",
             "left" to "ఎడమవైపు", "right" to "కుడివైపు", "slight_left" to "కొంచెం ఎడమవైపు", "slight_right" to "కొంచెం కుడివైపు",
             "ahead" to "ముందు", "far_left" to "చాలా ఎడమవైపు", "far_right" to "చాలా కుడివైపు"))
 

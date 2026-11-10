@@ -2,23 +2,41 @@ package com.kaleem.blindassist
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.objectdetector.ObjectDetector
 
-/** On-device COCO object detector (EfficientDet-Lite0). No internet, no laptop. */
-class Detector(ctx: Context) {
+const val MODEL_ASSET = "models/efficientdet_lite0.tflite"
+
+interface Detector {
+    /** true = no real detector loaded: the app only warns, it does NOT see obstacles. */
+    val limited: Boolean
+    fun detect(bmp: Bitmap): List<Det>
+    fun close()
+}
+
+/** Limited-mode fallback: detects nothing. The service must warn the user loudly and repeatedly. */
+class NullDetector : Detector {
+    override val limited = true
+    override fun detect(bmp: Bitmap): List<Det> = emptyList()
+    override fun close() {}
+}
+
+/** On-device COCO object detector (EfficientDet-Lite0 via MediaPipe). */
+class MediaPipeDetector(ctx: Context) : Detector {
+    override val limited = false
     private val od: ObjectDetector = ObjectDetector.createFromOptions(
         ctx,
         ObjectDetector.ObjectDetectorOptions.builder()
-            .setBaseOptions(BaseOptions.builder().setModelAssetPath("efficientdet_lite0.tflite").build())
+            .setBaseOptions(BaseOptions.builder().setModelAssetPath(MODEL_ASSET).build())
             .setScoreThreshold(Cfg.SCORE_MIN)
             .setMaxResults(12)
             .setRunningMode(RunningMode.IMAGE)
             .build())
 
-    fun detect(bmp: Bitmap): List<Det> {
+    override fun detect(bmp: Bitmap): List<Det> {
         val res = od.detect(BitmapImageBuilder(bmp).build())
         val out = ArrayList<Det>()
         for (d in res.detections()) {
@@ -32,5 +50,13 @@ class Detector(ctx: Context) {
         return out
     }
 
-    fun close() = od.close()
+    override fun close() = od.close()
+}
+
+/** Real detector if the model asset exists and loads; otherwise [NullDetector] (limited mode). */
+fun createDetector(ctx: Context): Detector = try {
+    val present = ctx.assets.list("models")?.contains("efficientdet_lite0.tflite") == true
+    if (present) MediaPipeDetector(ctx) else { Log.w("BA", "model asset missing -> limited mode"); NullDetector() }
+} catch (e: Throwable) {
+    Log.e("BA", "detector init failed -> limited mode", e); NullDetector()
 }
