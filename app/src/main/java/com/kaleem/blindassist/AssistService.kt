@@ -51,6 +51,10 @@ class AssistService : LifecycleService() {
     private val ocrExec = Executors.newSingleThreadExecutor()
     @Volatile private var lastFrame: Bitmap? = null
     private var wakeT = 0.0
+    private var motion: MotionMonitor? = null
+    private val voice: VoiceEngine = NullVoice()
+    private val sos = SosCountdown(15.0)
+    @Volatile private var sosAlarming = false
     private var earcons: Earcons? = null
     private var sensors: PocketSensors? = null
     private var detector: Detector? = null
@@ -86,6 +90,8 @@ class AssistService : LifecycleService() {
         speech = Speech(this, Cfg.lang)
         earcons = Earcons()
         sensors = PocketSensors(this).also { it.start() }
+        motion = MotionMonitor(this) { main.post { onFall() } }.also { it.start() }
+        if (voice.available) voice.start { text -> main.post { onTranscript(text) } }
         wake = (getSystemService(Context.POWER_SERVICE) as PowerManager)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "blindassist:run").also { it.acquire(4 * 60 * 60 * 1000L) }
         detector = createDetector(this)
@@ -267,8 +273,54 @@ class AssistService : LifecycleService() {
         session = s
     }
 
+    // ---- fall -> countdown -> LOCAL alarm only. No message/call is sent anywhere (not implemented). ----
+    private val sosTick = object : Runnable {
+        override fun run() {
+            if (!sos.active) return
+            if (sos.tick(nowS())) sosAlarm() else main.postDelayed(this, 1000)
+        }
+    }
+
+    private fun onFall() {
+        if (sos.active || sosAlarming) return
+        speech?.say(I18n.t(lang, "fall_alert"), P_CRITICAL, 20.0, "fall")
+        vibrateOnce(this)
+        sos.start(nowS()); main.postDelayed(sosTick, 1000)
+    }
+
+    private fun sosAlarm() {
+        sosAlarming = true
+        speech?.say(I18n.t(lang, "sos_expired"), P_CRITICAL, 30.0, "sos")
+        vibrateOnce(this)
+        main.postDelayed({ if (sosAlarming) sosAlarm() }, 10_000)
+    }
+
+    private fun cancelSos() { sos.cancel(); sosAlarming = false; main.removeCallbacks(sosTick) }
+
+    // ---- voice: wake word -> parser -> actions (no speech engine is shipped, see docs/VOICE_PLAN.md) ----
+    private fun onTranscript(text: String) {
+        val rest = WakeWord.strip(lang, text) ?: return
+        CommandDispatcher.dispatch(VoiceCommands.parse(lang, rest), actions)
+    }
+
+    private fun na() { speech?.say(I18n.t(lang, "not_available"), P_ANSWER, 10.0, "na") }
+
+    private val actions = object : AssistActions {
+        override fun whatsAhead() = summarize()
+        override fun readThis() = this@AssistService.readThis()
+        override fun describe() = na()                       // no scene-description model offline
+        override fun find(what: String) = na()
+        override fun navigate(place: String) = na()          // no GPS source / routing yet
+        override fun lost() { speech?.say(I18n.t(lang, "lost_msg"), P_CRITICAL, 20.0, "lost") }
+        override fun callFamily() = na()
+        override fun setVerbosity(v: Verbosity) { Cfg.verbose = (v == Verbosity.DETAILED) }
+        override fun stop() { stopSelf() }
+        override fun unknown() {}
+    }
+
     /** Earphone "next" (usually double press) = read text in the current camera frame. OCR is Latin script only. UNVERIFIED on device. */
     private fun readThis() {
+        cancelSos()
         val frame = lastFrame
         if (frame == null) { speech?.say(I18n.t(lang, "nothing"), P_ANSWER, 10.0, "read"); return }
         ocrExec.execute {
@@ -278,6 +330,7 @@ class AssistService : LifecycleService() {
     }
 
     private fun summarize() {
+        cancelSos()
         val now = nowS()
         val near = (pipeline?.lastTracks ?: emptyList()).filter { it.z != null && now - it.tLast < 1.0 }
             .sortedBy { it.z }.take(3)
@@ -300,6 +353,10 @@ class AssistService : LifecycleService() {
         earcons?.shutdown()
         exec.shutdown()
         ocrExec.shutdown()
+        motion?.stop()
+        voice.stop()
+        main.removeCallbacks(sosTick)
+        sosAlarming = false
         ocr?.close()
         getSharedPreferences("ba", Context.MODE_PRIVATE).edit().putBoolean("running_flag", false).apply()
         try { detector?.close() } catch (_: Exception) {}

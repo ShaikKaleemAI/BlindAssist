@@ -5,3 +5,4 @@
 - Personal-assistant logic: fall detector, SOS countdown, adaptive verbosity, place store, daily summary (unwired).
 - Navigation (waypoint routes, off-route) and OCR post-processing logic (unwired).
 - Hazard model runtime (TFLite YOLO) + decoder, depth free-space logic, ML Kit OCR on earphone next, OEM hints, crash/wake-lock handling.
+- Fall alarm (local), wake-word gate, voice-engine plug-in point, spoken "not available" replies.
