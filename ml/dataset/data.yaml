@@ -1,20 +1,18 @@
-# YOLO dataset config. Images/labels are NOT in the repo (collect them: see ml/dataset/COLLECTION_PLAN.md)
 path: ml/dataset
 train: images/train
 val: images/val
 test: images/test
 names:
-  0: stairs_up
-  1: stairs_down
-  2: step
-  3: pothole
-  4: open_drain
-  5: manhole
-  6: curb
-  7: pole
-  8: glass_door
-  9: speed_bump
-  10: vehicle
-  11: cow
-  12: auto_rickshaw
-  13: person
+  0: stairs
+  1: step
+  2: pothole
+  3: open_drain
+  4: manhole
+  5: curb
+  6: pole
+  7: glass_door
+  8: speed_bump
+  9: vehicle
+  10: cow
+  11: auto_rickshaw
+  12: person

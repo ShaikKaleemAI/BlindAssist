@@ -15,7 +15,7 @@ Legend: [YOU] only you can do it · [DECIDE] needs your decision · [ME] I can b
 | Scene description | Accept a large on-device VLM download? | optional model fetch + fallback text |
 
 ## 2. Needs data, a model or hardware [YOU]
-- Collect + label hazard data, train, export INT8, drop `hazard_yolo_int8.tflite` + `hazard_labels.txt` into assets/models (ml/README.md).
+- Run the open-data pipeline once on a GPU (Colab: ml/train_colab.ipynb, ~no data from you needed; optional free Roboflow key), commit docs/generated + the model it copies into assets/models. Then (for any 9+ claim) collect field video: ml/dataset/COLLECTION_PLAN.md Stage B.
 - Export a depth model (Depth Anything V2 small / MiDaS) to INT8 TFLite, then I wire `DepthEstimator` + `FreeSpace` into the pipeline.
 - Tape-measure distance benchmark; 30-minute false-alarm walks; 2-hour thermal walk; screen-off tests on Samsung/Xiaomi/Oppo/Vivo.
 - Native-speaker review of every Hindi and Telugu string (labels, alerts, wake phrases, commands).

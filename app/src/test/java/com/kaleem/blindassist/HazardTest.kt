@@ -48,7 +48,7 @@ class HazardTest {
     }
 
     @Test fun everyModelClassIsAlertableAndLocalised() {
-        for (raw in listOf("stairs_up", "stairs_down", "step", "pothole", "open_drain", "manhole", "curb", "pole", "glass_door",
+        for (raw in listOf("stairs", "stairs_up", "stairs_down", "step", "pothole", "open_drain", "manhole", "curb", "pole", "glass_door",
             "speed_bump", "vehicle", "cow", "auto_rickshaw", "person")) {
             val l = HazardLabels.map(raw)
             assertTrue("$l not in NAV", l in Cfg.NAV)

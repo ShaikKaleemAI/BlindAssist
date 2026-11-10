@@ -6,3 +6,4 @@
 - Navigation (waypoint routes, off-route) and OCR post-processing logic (unwired).
 - Hazard model runtime (TFLite YOLO) + decoder, depth free-space logic, ML Kit OCR on earphone next, OEM hints, crash/wake-lock handling.
 - Fall alarm (local), wake-word gate, voice-engine plug-in point, spoken "not available" replies.
+- Open-data pipeline (fetch, merge, train, eval, generated reports, Colab notebook); stairs unified into one class.

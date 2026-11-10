@@ -1,5 +1,4 @@
-stairs_up
-stairs_down
+stairs
 step
 pothole
 open_drain

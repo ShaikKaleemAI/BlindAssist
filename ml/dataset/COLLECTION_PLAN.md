@@ -1,8 +1,5 @@
-# Collection + labeling plan (status: PLAN ONLY — no data collected; dataset size = PENDING FIELD DATA)
-- Capture with the target phone at pocket height (85 cm trouser / 120 cm shirt), walking, portrait, 640x480+; video at 10 fps extraction.
-- Cover: day/dusk/night, rain, indoor/outdoor, Indian street scenes, multiple phones, motion blur from walking.
-- Per class aim for diverse sites, not many frames from one site. Split by SITE (not by frame) to avoid leakage: `python ml/dataset/split_dataset.py`.
-- Label in CVAT / Label Studio, YOLO format. Two annotators on a 10% subset; report agreement.
-- Hard negatives: shadows, painted lines, puddles, tiles, reflections (these drive false alarms).
-- Privacy: blur faces/plates before sharing; get consent; keep raw video on-device/private.
-- Safety-critical classes (stairs_down, open_drain, pothole) need the most data; report per-class recall, never just mAP.
+# Data plan
+**Stage A (automatic, no user data needed): open datasets** — `ml/open_data/sources.yaml` lists the sources and licences; `ml/run_all.sh` (or ml/train_colab.ipynb) downloads, merges, trains, evaluates. Real counts appear in docs/generated/DATASET_STATS.md only after you run it (PENDING until then).
+Known gaps of open data (do not hide them): no up/down stairs labels (single `stairs` class); few or no open drains, curbs, speed bumps, glass doors; Indian auto-rickshaws only via IDD (registration); mostly web photos, not pocket-height walking video; the `drain*` mapping is noisy.
+**Stage B (needed for a 9+ claim): field video** — walking video at pocket height (85 cm trouser / 120 cm shirt), Indian streets, day/dusk/night, rain, multiple phones; label with CVAT/Label Studio; split by SITE; blur faces/plates; consent. Without Stage B, report only open-data results.
+Hard negatives: shadows, painted lines, puddles, tiles, reflections. Two annotators on 10% for agreement.

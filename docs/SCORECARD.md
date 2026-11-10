@@ -18,6 +18,7 @@
 
 ## Stage status (all code NOT COMPILED LOCALLY; Kotlin tests written but never run)
 - Stage 0: done. Stage 1: done in code + replay/ablation (tape, JVM runner, debug-only video->tape receiver).
+- Stage 2 data: open-data pipeline built and its merge/split/report logic unit-tested on MOCK data (15 Python tests PASSED locally, tooling only): ml/open_data/{sources.yaml,fetch_open_data.py,build_dataset.py}, ml/make_report.py, ml/run_all.sh, ml/train_colab.ipynb. Downloads/training/eval NOT run (no network/GPU here); no real dataset size or accuracy exists yet.
 - Stage 2: runtime hazard detector implemented (`TfliteHazardDetector`: TFLite INT8 YOLO, CPU default, NNAPI opt-in, `YoloDecoder` + NMS with JVM tests, labels file, hazard classes ranged via ground cue, hi/te labels NEEDS NATIVE REVIEW). No model is trained or shipped, so detection of stairs/potholes/drains/etc. is UNVERIFIED and currently inactive: without `hazard_yolo_int8.tflite` + `hazard_labels.txt` the app uses COCO or limited mode. Stretch-resize vs training letterbox is a known accuracy risk. GPU delegate NOT implemented.
 - Stage 3: free-space/drop-off logic on relative inverse depth (ground-plane fit) + `DepthEstimator` interface, synthetic tests only. NO depth model, NOT wired. Depth is relative, never metric.
 - Stage 4: step detector, orientation/roll, sway estimator, height-from-walk math: library + tests; NOT wired (roll not applied, no calibration UI).
