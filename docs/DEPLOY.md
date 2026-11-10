@@ -8,6 +8,6 @@ git push -u origin main
 ```
 Add secrets (GitHub > Settings > Secrets > Actions): KEYSTORE_BASE64 (`base64 -w0 release.jks`), KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD.
 ```
-git tag v0.1.0 && git push origin v0.1.0
+git tag v0.2.0 && git push origin v0.1.0
 ```
 Download APK from Releases, then: `adb install -r BlindAssist-release.apk` or sideload. Fetch the detector model for local builds: `tools/fetch_models.sh`.
