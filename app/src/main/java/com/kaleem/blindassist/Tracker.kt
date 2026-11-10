@@ -56,7 +56,7 @@ class Track(val label: String, var box: DoubleArray, var est: RangeEst?, t: Doub
     var ttc: Double? = null
     var closingSpeed = 0.0
 
-    val z: Double? get() = kf?.z ?: est?.z
+    val z: Double? get() = if (Cfg.useKalman) (kf?.z ?: est?.z) else est?.z
     val bearing: Double get() = est?.bearing ?: 0.0
     val x: Double? get() { val e = est ?: return null; return (z ?: return null) * tan(Math.toRadians(e.bearing)) }
 
@@ -106,9 +106,9 @@ class Track(val label: String, var box: DoubleArray, var est: RangeEst?, t: Doub
             x?.let { xHist.addLast(t to it); while (xHist.size > 10) xHist.removeFirst() }
             vx = lateralVelocity()
         }
-        val tl = loomingTtc()
+        val tl = if (Cfg.useLooming) loomingTtc() else null
         var tk: Double? = null
-        kf?.let { closingSpeed = -it.v; if (closingSpeed > 0.25 && it.z > 0) tk = it.z / closingSpeed }
+        if (Cfg.useKalman) kf?.let { closingSpeed = -it.v; if (closingSpeed > 0.25 && it.z > 0) tk = it.z / closingSpeed }
         ttc = when {
             tl != null && tk != null -> min(tl, tk!!)
             tl != null -> tl

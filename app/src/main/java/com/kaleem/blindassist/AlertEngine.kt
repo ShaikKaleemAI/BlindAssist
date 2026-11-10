@@ -56,6 +56,7 @@ class AlertEngine(var lang: String) {
     private var nextBeepT = 0.0
 
     private fun effective(tr: Track, raw: Level, now: Double): Level {
+        if (!Cfg.useHysteresis) return raw
         val prev = shown[tr.id] ?: Level.NONE
         if (raw >= prev) { shown[tr.id] = raw; levelSince[tr.id] = raw to now; return raw }
         val (lv, t0) = levelSince[tr.id] ?: (raw to now)

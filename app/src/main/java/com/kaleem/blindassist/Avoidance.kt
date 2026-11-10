@@ -27,6 +27,7 @@ object Avoidance {
     }
 
     fun plan(tracks: List<Track>): Guidance {
+        if (!Cfg.useAvoidance) return Guidance("clear", null)
         val near = tracks.filter { val z = it.z; z != null && it.x != null && z > 0 && z <= Cfg.LOOKAHEAD }
         val blockers = near.filter { inPath(it) }
         if (blockers.isEmpty()) return Guidance("clear", null)

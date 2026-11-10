@@ -30,12 +30,12 @@ fun estimateRange(label: String, box: DoubleArray, fw: Double, fh: Double, cam: 
     val flags = mutableSetOf<String>()
 
     if (dims != null) {
-        if (!(clipL || clipR)) { val z = fx * dims.w / bw; cands += Cand(z, dims.sw * z, "width") }
+        if (!(clipL || clipR)) { if (Cfg.useWidth) { val z = fx * dims.w / bw; cands += Cand(z, dims.sw * z, "width") } }
         else { bounds += fx * dims.w * (1 + 1.5 * dims.sw) / bw; flags += "clipped_side" }
-        if (!(clipT || clipB)) { val z = fx * dims.h / bh; cands += Cand(z, dims.sh * z, "height") }
+        if (!(clipT || clipB)) { if (Cfg.useHeight) { val z = fx * dims.h / bh; cands += Cand(z, dims.sh * z, "height") } }
         else if (clipT) { bounds += fx * dims.h * (1 + 1.5 * dims.sh) / bh; flags += "clipped_top" }
     }
-    if (label in Cfg.GROUNDED) {
+    if (Cfg.useGround && label in Cfg.GROUNDED) {
         if (!clipB) {
             val z = cam.groundZ(uc, y2, fw, fh, pitch)
             if (z != null && z > 0.3) {

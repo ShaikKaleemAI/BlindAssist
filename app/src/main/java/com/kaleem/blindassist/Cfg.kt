@@ -11,6 +11,11 @@ object Cfg {
     var pitchSigmaDeg = 3.0     // pocket sways more than a chest mount
     var verbose = false
 
+    // Ablation switches (all ON in production). Used by the replay harness only.
+    var useWidth = true; var useHeight = true; var useGround = true
+    var useKalman = true; var useLooming = true; var useAvoidance = true; var useHysteresis = true
+    fun resetAblation() { useWidth = true; useHeight = true; useGround = true; useKalman = true; useLooming = true; useAvoidance = true; useHysteresis = true }
+
     const val USER_HALF_WIDTH = 0.35
     const val CORRIDOR_MARGIN = 0.25
     const val CORRIDOR_GROWTH = 0.05

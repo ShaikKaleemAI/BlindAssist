@@ -19,9 +19,10 @@
 ## Stage status
 - Stage 0: done. Stage 1: done in code, not built.
 - Stage 2: dataset plan + train/export/eval scripts only; no runtime hazard detector. NOT RUN.
+- Stage 1 addendum: replay-from-video (debug-only receiver -> tape) + JVM ReplayRunner + ablation switches implemented, tests written, NOT run; video orientation handling UNVERIFIED.
 - Stage 3 (depth/free space): NOT STARTED (needs a quantized depth model + device).
 - Stage 4: step detector, orientation/roll helper, sway estimator, height-from-walking math = library + unit tests (not run). NOT wired into the service: roll is not applied to frames, sway is not fed to range fusion, no calibration UI. Thresholds ASSUMED.
 - Stage 8 (partial): thermal frame-skipping + spoken hot warning wired in the service (thresholds ASSUMED, UNVERIFIED on device). OEM survival, battery-optimization prompt, crash recovery: NOT STARTED.
 - Stage 5 (partial): text-to-command parser (en/hi/te) + unit tests (not run). No wake word, no speech recognition, no actions wired. Hindi/Telugu phrases NEEDS NATIVE REVIEW.
-- Stage 9 (partial): Python tools for metrics.csv summary, distance benchmark, confusion matrix/per-class recall, ablation plan; 5 Python unit tests PASSED locally (VERIFIED, tooling only; says nothing about the app). Ablation has no runner because replay mode is not implemented. Paper/slides/protocol hold PENDING FIELD DATA.
+- Stage 9 (partial): Python tools for metrics.csv summary, distance benchmark, confusion matrix/per-class recall, ablation plan; 5 Python unit tests PASSED locally (VERIFIED, tooling only; says nothing about the app). Ablation runner = tools/ablation/run_gradle.sh (needs a tape + Gradle; never run). Paper/slides/protocol hold PENDING FIELD DATA.
 - Stages 6, 7 (navigation/OCR, personal assistant): NOT STARTED.
