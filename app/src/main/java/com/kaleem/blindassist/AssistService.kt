@@ -42,6 +42,7 @@ class AssistService : LifecycleService() {
     companion object {
         const val ACTION_STOP = "com.kaleem.blindassist.STOP"
         @Volatile var running = false
+        @Volatile private var crashHandlerInstalled = false
     }
 
     private val main = Handler(Looper.getMainLooper())
@@ -81,10 +82,14 @@ class AssistService : LifecycleService() {
         Cfg.camHeightM = sp.getFloat("height_cm", 110f) / 100.0
         startFg()
         getSharedPreferences("ba", Context.MODE_PRIVATE).edit().putBoolean("running_flag", true).apply()
-        val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            try { vibrateOnce(applicationContext) } catch (_: Throwable) {}     // last-gasp haptic: the app is dying silently
-            prevHandler?.uncaughtException(t, e)
+        if (!crashHandlerInstalled) {                                   // install once per process, not per service start
+            crashHandlerInstalled = true
+            val app = applicationContext
+            val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
+            Thread.setDefaultUncaughtExceptionHandler { t, e ->
+                try { vibrateOnce(app) } catch (_: Throwable) {}         // last-gasp haptic: the app is dying silently
+                prevHandler?.uncaughtException(t, e)
+            }
         }
         metrics = try { MetricsLogger(java.io.File(filesDir, "metrics.csv")) } catch (e: Exception) { null }
         speech = Speech(this, Cfg.lang)
@@ -311,7 +316,7 @@ class AssistService : LifecycleService() {
         override fun describe() = na()                       // no scene-description model offline
         override fun find(what: String) = na()
         override fun navigate(place: String) = na()          // no GPS source / routing yet
-        override fun lost() { speech?.say(I18n.t(lang, "lost_msg"), P_CRITICAL, 20.0, "lost") }
+        override fun lost() { speech?.say(I18n.t(lang, "lost_msg"), P_CRITICAL, 20.0, "lostmsg") }
         override fun callFamily() = na()
         override fun setVerbosity(v: Verbosity) { Cfg.verbose = (v == Verbosity.DETAILED) }
         override fun stop() { stopSelf() }

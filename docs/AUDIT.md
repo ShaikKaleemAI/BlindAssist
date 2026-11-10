@@ -54,3 +54,11 @@ Audit method: every file read by hand. No compiler or Gradle was available in th
 - `AssistService.kt` — foreground camera service, watchdog, MediaSession button. No thermal/battery handling.
 - `MainActivity.kt` — programmatic UI, one big button; no spoken onboarding safety text beyond service start.
 - `I18n.kt` — en/hi/te strings; Hindi/Telugu unreviewed.
+
+## Self-review addendum (manual, no compiler available — NOT a substitute for CI)
+Re-read every edited Kotlin file and cross-checked the unit-test assumptions against `Cfg`/`AlertEngine`/`Avoidance`/`I18n` constants by hand (e.g. corridor half-width at 2 m = 0.70 m, vehicle scale 2.0, step string). Fixed:
+- `tts?.language = ...` replaced by `setLanguage(...)` (setter returns Int; synthetic-property assignment may not compile).
+- `@Suppress` on an `else` expression replaced by a function-level annotation.
+- Crash handler installed once per process (was chained on every service start, leaking the service).
+- Speech key collision (`"lost"` used by both camera-lost and the voice "I'm lost" reply) -> `"lostmsg"`.
+Remaining known compile/test risks (UNVERIFIED): TFLite/ML Kit dependency resolution and API signatures (`Tensor.numBytes`, `quantizationParams`), `MediaSession.Callback.onSkipToNext`, lint errors in the debug manifest overlay, numeric tolerances in tests that depend on Kalman convergence (`TrackerTest.approachingObjectGetsFiniteTtc`, `ReplayTest`).

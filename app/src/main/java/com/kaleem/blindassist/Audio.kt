@@ -49,11 +49,11 @@ class Earcons {
     fun shutdown() = ex.shutdownNow()
 }
 
+@Suppress("DEPRECATION")
 fun vibrateOnce(ctx: Context) {
-    @Suppress("DEPRECATION")
     val v = ctx.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
     if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 120, 60, 120), -1))
-    else @Suppress("DEPRECATION") v.vibrate(longArrayOf(0, 120, 60, 120), -1)
+    else v.vibrate(longArrayOf(0, 120, 60, 120), -1)
 }
 
 /** Priority speech: critical preempts, stale items expire (TTL), interrupted answers are re-queued. */
@@ -114,7 +114,7 @@ class Speech(ctx: Context, var lang: String) {
                 val r = tts?.setLanguage(loc)
                 if ((r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) && !voiceWarned) {
                     voiceWarned = true
-                    tts?.language = Locale("en", "IN")
+                    tts?.setLanguage(Locale("en", "IN"))
                     tts?.speak(I18n.t("en", "voice_missing"), TextToSpeech.QUEUE_FLUSH, null, "vm")
                     latch.await(8, TimeUnit.SECONDS)
                 }
