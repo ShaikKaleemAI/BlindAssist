@@ -6,7 +6,7 @@ import org.junit.Test
 class I18nTest {
     private val keys = listOf("step", "steps", "obstacle", "approaching", "critical", "move_left", "move_right", "blocked",
         "camera_lost", "camera_back", "slow", "nothing", "starting", "ready", "stopped", "covered", "not_upright",
-        "no_model", "limited_mode", "left", "right", "slight_left", "slight_right", "ahead", "far_left", "far_right")
+        "no_model", "hot", "limited_mode", "left", "right", "slight_left", "slight_right", "ahead", "far_left", "far_right")
 
     @Test fun placeholdersAreSubstituted() {
         assertEquals("person, 12 o'clock, 2 steps.",

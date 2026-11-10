@@ -17,4 +17,9 @@
 | Build green | NOT COMPILED LOCALLY | CI run of android-ci.yml |
 
 ## Stage status
-Stage 0 done. Stage 1 done in code, not built. Stage 2: dataset plan + scripts only, no runtime hazard detector. Stages 3-9: NOT STARTED.
+- Stage 0: done. Stage 1: done in code, not built.
+- Stage 2: dataset plan + train/export/eval scripts only; no runtime hazard detector. NOT RUN.
+- Stage 3 (depth/free space): NOT STARTED (needs a quantized depth model + device).
+- Stage 4: step detector, orientation/roll helper, sway estimator, height-from-walking math = library + unit tests (not run). NOT wired into the service: roll is not applied to frames, sway is not fed to range fusion, no calibration UI. Thresholds ASSUMED.
+- Stage 8 (partial): thermal frame-skipping + spoken hot warning wired in the service (thresholds ASSUMED, UNVERIFIED on device). OEM survival, battery-optimization prompt, crash recovery: NOT STARTED.
+- Stages 5, 6, 7, 9 (voice, navigation/OCR, personal assistant, evidence harness): NOT STARTED (docs/templates only).

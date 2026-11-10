@@ -144,6 +144,7 @@ class AssistService : LifecycleService() {
 
     private fun analyze(img: ImageProxy) {
         try {
+            if (thermalSkip > 0 && (frameCounter++ % (thermalSkip + 1)) != 0) return   // thermal throttling
             val p = pipeline ?: return
             val det = detector ?: return
             val sen = sensors ?: return
@@ -163,15 +164,30 @@ class AssistService : LifecycleService() {
         } catch (e: Throwable) { Log.e("BA", "analyze", e) } finally { img.close() }
     }
 
+    private var lastBatT = -1e9
+    private var lastTemp = Double.NaN
+    private var lastPct = -1
+    private var lastHotT = -1e9
+    @Volatile private var thermalSkip = 0
+    private var frameCounter = 0
+
     private fun logMetrics(now: Double, ms: Double) {
-        val m = metrics ?: return
         try {
-            val i = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            val temp = (i?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE) ?: Int.MIN_VALUE)
-                .let { if (it == Int.MIN_VALUE) Double.NaN else it / 10.0 }
-            val lvl = i?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-            val scale = i?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
-            m.frame(now, ms, temp, if (lvl < 0) -1 else lvl * 100 / scale, detector?.limited == true)
+            if (now - lastBatT >= 5.0) {                       // battery/temperature polled every 5 s, not per frame
+                lastBatT = now
+                val i = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                val raw = i?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE) ?: Int.MIN_VALUE
+                lastTemp = if (raw == Int.MIN_VALUE) Double.NaN else raw / 10.0
+                val lvl = i?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                val scale = i?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
+                lastPct = if (lvl < 0) -1 else lvl * 100 / scale
+                thermalSkip = ThermalPolicy.frameSkip(lastTemp)
+                if (ThermalPolicy.shouldWarn(lastTemp) && now - lastHotT > 300) {
+                    lastHotT = now
+                    speech?.say(I18n.t(lang, "hot"), P_ANSWER, 10.0, "hot")
+                }
+            }
+            metrics?.frame(now, ms, lastTemp, lastPct, detector?.limited == true)
         } catch (_: Exception) {}
     }
 
