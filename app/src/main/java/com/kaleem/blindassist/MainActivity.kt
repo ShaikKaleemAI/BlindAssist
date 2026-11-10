@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -60,6 +61,15 @@ class MainActivity : AppCompatActivity() {
             text = "This is an aid, not a replacement for your white cane or guide dog. Phone must be upright, back camera facing forward and uncovered."
         }
         root.addView(status, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        OemHints.hintFor(Build.MANUFACTURER)?.let { status.append("\n" + it) }
+        if (sp.getBoolean("running_flag", false) && !AssistService.running) {
+            status.append("\nBlind Assist stopped unexpectedly last time. Check battery settings.")
+            sp.edit().putBoolean("running_flag", false).apply()
+        }
+        root.addView(Button(this).apply {
+            text = "Battery settings (keep running with screen off)"
+            setOnClickListener { try { startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) } catch (_: Exception) {} }
+        }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         setContentView(root)
     }
 

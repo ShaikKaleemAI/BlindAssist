@@ -53,10 +53,15 @@ class MediaPipeDetector(ctx: Context) : Detector {
     override fun close() = od.close()
 }
 
-/** Real detector if the model asset exists and loads; otherwise [NullDetector] (limited mode). */
-fun createDetector(ctx: Context): Detector = try {
-    val present = ctx.assets.list("models")?.contains("efficientdet_lite0.tflite") == true
-    if (present) MediaPipeDetector(ctx) else { Log.w("BA", "model asset missing -> limited mode"); NullDetector() }
-} catch (e: Throwable) {
-    Log.e("BA", "detector init failed -> limited mode", e); NullDetector()
+/** Hazard model if present, else COCO EfficientDet-Lite0, else [NullDetector] (limited mode). Each step falls through on any failure. */
+fun createDetector(ctx: Context): Detector {
+    val files = try { ctx.assets.list("models")?.toSet() ?: emptySet() } catch (e: Exception) { emptySet() }
+    if ("hazard_yolo_int8.tflite" in files && "hazard_labels.txt" in files) {
+        try { return TfliteHazardDetector(ctx) } catch (e: Throwable) { Log.e("BA", "hazard model failed, trying COCO", e) }
+    }
+    if ("efficientdet_lite0.tflite" in files) {
+        try { return MediaPipeDetector(ctx) } catch (e: Throwable) { Log.e("BA", "COCO model failed -> limited mode", e) }
+    }
+    Log.w("BA", "no usable model -> limited mode")
+    return NullDetector()
 }

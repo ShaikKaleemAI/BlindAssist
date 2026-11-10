@@ -4,3 +4,4 @@
 - Motion helpers (steps, orientation, sway, height calibration) as tested library; thermal throttling + hot warning.
 - Personal-assistant logic: fall detector, SOS countdown, adaptive verbosity, place store, daily summary (unwired).
 - Navigation (waypoint routes, off-route) and OCR post-processing logic (unwired).
+- Hazard model runtime (TFLite YOLO) + decoder, depth free-space logic, ML Kit OCR on earphone next, OEM hints, crash/wake-lock handling.

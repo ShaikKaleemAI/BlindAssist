@@ -10,6 +10,7 @@ object Cfg {
     var defaultPitchDeg = 0.0   // camera horizontal when phone is upright
     var pitchSigmaDeg = 3.0     // pocket sways more than a chest mount
     var verbose = false
+    var useNnapi = false        // OFF until validated per device (see TfliteHazardDetector)
 
     // Ablation switches (all ON in production). Used by the replay harness only.
     var useWidth = true; var useHeight = true; var useGround = true
@@ -47,10 +48,13 @@ object Cfg {
         "cat" to Dims(0.25, 0.30, 0.60, 0.50), "cow" to Dims(0.70, 1.40, 0.70, 0.20),
         "horse" to Dims(0.70, 1.60, 0.70, 0.20), "fire hydrant" to Dims(0.30, 0.70, 0.20, 0.25),
         "suitcase" to Dims(0.45, 0.70, 0.30, 0.30), "bed" to Dims(1.50, 0.60, 0.40, 0.40),
+        // sizes below are ASSUMED (hazard model classes); tune with the tape-measure benchmark
+        "pole" to Dims(0.15, 3.00, 0.50, 0.50), "glass door" to Dims(1.00, 2.00, 0.30, 0.15),
+        "auto rickshaw" to Dims(1.40, 1.70, 0.20, 0.15),
     )
-    val GROUNDED = DIMS.keys
-    val VEHICLES = setOf("bicycle", "car", "motorcycle", "bus", "truck")
+    val GROUND_HAZARDS = setOf("stairs", "steps", "pothole", "open drain", "manhole", "curb", "speed bump") // from the custom hazard model
+    val GROUNDED: Set<String> = DIMS.keys + GROUND_HAZARDS
+    val VEHICLES = setOf("bicycle", "car", "motorcycle", "bus", "truck", "auto rickshaw")
     val DYNAMIC = VEHICLES + setOf("person", "dog", "cat", "cow", "horse")
-    val GROUND_HAZARDS = setOf("stairs", "steps", "pothole", "open drain", "manhole", "curb") // for a future fine-tuned model
-    val NAV: Set<String> = DIMS.keys   // labels without DIMS cannot be ranged, so they are not alerted
+    val NAV: Set<String> = DIMS.keys + GROUND_HAZARDS   // labels without DIMS cannot be ranged, so they are not alerted
 }

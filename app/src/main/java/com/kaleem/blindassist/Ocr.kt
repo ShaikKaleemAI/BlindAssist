@@ -32,3 +32,13 @@ object MedicineLabel {
         if (text.isBlank()) "I could not read the label."
         else "Label text, may contain errors: ${text.trim().take(300)}. Do not use this for dosing. Ask a pharmacist or a person you trust."
 }
+
+/** What "read this" speaks. Short text with a note value -> currency candidates; otherwise hedged raw text. */
+object ReadThis {
+    fun speak(text: String): String {
+        val t = text.trim()
+        if (t.isEmpty()) return "I could not read any text."
+        if (t.length < 40 && Currency.candidates(t).isNotEmpty()) return Currency.speak(t)
+        return "Text, may contain errors: ${t.take(300)}"
+    }
+}

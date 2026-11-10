@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.mediapipe.tasks.vision)
+    implementation(libs.tflite)
+    implementation(libs.mlkit.text)
     testImplementation(libs.junit)
 }
 // NOTE: no model is downloaded at build time. Run tools/fetch_models.sh (needs network once).

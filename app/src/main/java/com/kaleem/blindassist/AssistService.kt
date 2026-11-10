@@ -47,6 +47,10 @@ class AssistService : LifecycleService() {
     private val main = Handler(Looper.getMainLooper())
     private val exec = Executors.newSingleThreadExecutor()
     private var speech: Speech? = null
+    private var ocr: OcrReader? = null
+    private val ocrExec = Executors.newSingleThreadExecutor()
+    @Volatile private var lastFrame: Bitmap? = null
+    private var wakeT = 0.0
     private var earcons: Earcons? = null
     private var sensors: PocketSensors? = null
     private var detector: Detector? = null
@@ -72,6 +76,12 @@ class AssistService : LifecycleService() {
         Cfg.lang = sp.getString("lang", "en") ?: "en"
         Cfg.camHeightM = sp.getFloat("height_cm", 110f) / 100.0
         startFg()
+        getSharedPreferences("ba", Context.MODE_PRIVATE).edit().putBoolean("running_flag", true).apply()
+        val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+            try { vibrateOnce(applicationContext) } catch (_: Throwable) {}     // last-gasp haptic: the app is dying silently
+            prevHandler?.uncaughtException(t, e)
+        }
         metrics = try { MetricsLogger(java.io.File(filesDir, "metrics.csv")) } catch (e: Exception) { null }
         speech = Speech(this, Cfg.lang)
         earcons = Earcons()
@@ -86,6 +96,7 @@ class AssistService : LifecycleService() {
         }
         speech?.say(I18n.t(lang, "starting"), P_ANSWER, 30.0, "start")
         armedAt = nowS() + 10.0
+        wakeT = nowS()
         main.postDelayed({ speech?.say(I18n.t(lang, "ready"), P_ANSWER, 5.0, "ready") }, 10_000)
         bindCamera()
         setupSession()
@@ -154,6 +165,7 @@ class AssistService : LifecycleService() {
             val rot = img.imageInfo.rotationDegrees + if (sen.upsideDown()) 180 else 0
             val raw = img.toBitmap()
             val up = Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, Matrix().apply { postRotate(rot.toFloat()) }, true)
+            lastFrame = up
             checkHealth(up, now, sen.pitchDeg())
             val evs = p.process(det.detect(up), now, up.width.toDouble(), up.height.toDouble(), sen.pitchDeg())
             dispatch(evs, now)
@@ -227,6 +239,10 @@ class AssistService : LifecycleService() {
     private val watchdog = object : Runnable {
         override fun run() {
             val now = nowS()
+            if (now - wakeT > 3 * 3600) {                         // wake lock has a 4 h timeout: refresh before it lapses
+                wakeT = now
+                try { if (wake?.isHeld == true) wake?.release(); wake?.acquire(4 * 60 * 60 * 1000L) } catch (_: Exception) {}
+            }
             if (now > armedAt) {
                 val stalled = now - lastFrameT > 1.5
                 if (stalled && !cameraLost) { cameraLost = true; speech?.say(I18n.t(lang, "camera_lost"), P_CRITICAL, 5.0, "lost") }
@@ -242,12 +258,23 @@ class AssistService : LifecycleService() {
         s.setCallback(object : MediaSession.Callback() {
             override fun onPlay() = summarize()
             override fun onPause() = summarize()
+            override fun onSkipToNext() = readThis()
         })
         s.setPlaybackState(PlaybackState.Builder()
-            .setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_PLAY_PAUSE)
+            .setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_PLAY_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT)
             .setState(PlaybackState.STATE_PLAYING, 0, 1f).build())
         s.isActive = true
         session = s
+    }
+
+    /** Earphone "next" (usually double press) = read text in the current camera frame. OCR is Latin script only. UNVERIFIED on device. */
+    private fun readThis() {
+        val frame = lastFrame
+        if (frame == null) { speech?.say(I18n.t(lang, "nothing"), P_ANSWER, 10.0, "read"); return }
+        ocrExec.execute {
+            val r = ocr ?: OcrReader().also { ocr = it }
+            speech?.say(ReadThis.speak(r.read(frame)), P_ANSWER, 20.0, "read")
+        }
     }
 
     private fun summarize() {
@@ -272,6 +299,9 @@ class AssistService : LifecycleService() {
         sensors?.stop()
         earcons?.shutdown()
         exec.shutdown()
+        ocrExec.shutdown()
+        ocr?.close()
+        getSharedPreferences("ba", Context.MODE_PRIVATE).edit().putBoolean("running_flag", false).apply()
         try { detector?.close() } catch (_: Exception) {}
         try { if (wake?.isHeld == true) wake?.release() } catch (_: Exception) {}
         super.onDestroy()

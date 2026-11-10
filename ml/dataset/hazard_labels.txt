@@ -1,0 +1,14 @@
+stairs_up
+stairs_down
+step
+pothole
+open_drain
+manhole
+curb
+pole
+glass_door
+speed_bump
+vehicle
+cow
+auto_rickshaw
+person

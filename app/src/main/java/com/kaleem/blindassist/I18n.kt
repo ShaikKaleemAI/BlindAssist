@@ -62,10 +62,14 @@ object I18n {
     private val LABELS = mapOf(
         "hi" to mapOf("person" to "व्यक्ति", "car" to "कार", "bicycle" to "साइकिल", "motorcycle" to "मोटरसाइकिल",
             "bus" to "बस", "truck" to "ट्रक", "chair" to "कुर्सी", "couch" to "सोफा", "bench" to "बेंच",
-            "dining table" to "मेज़", "dog" to "कुत्ता", "cat" to "बिल्ली", "cow" to "गाय"),
+            "dining table" to "मेज़", "dog" to "कुत्ता", "cat" to "बिल्ली", "cow" to "गाय",
+            "stairs" to "सीढ़ियाँ", "steps" to "सीढ़ी", "pothole" to "गड्ढा", "open drain" to "खुली नाली", "manhole" to "मैनहोल",
+            "curb" to "फुटपाथ का किनारा", "speed bump" to "स्पीड ब्रेकर", "pole" to "खंभा", "glass door" to "कांच का दरवाज़ा", "auto rickshaw" to "ऑटो"),
         "te" to mapOf("person" to "మనిషి", "car" to "కారు", "bicycle" to "సైకిల్", "motorcycle" to "బైక్",
             "bus" to "బస్సు", "truck" to "లారీ", "chair" to "కుర్చీ", "couch" to "సోఫా", "bench" to "బెంచ్",
-            "dining table" to "బల్ల", "dog" to "కుక్క", "cat" to "పిల్లి", "cow" to "ఆవు"))
+            "dining table" to "బల్ల", "dog" to "కుక్క", "cat" to "పిల్లి", "cow" to "ఆవు",
+            "stairs" to "మెట్లు", "steps" to "మెట్టు", "pothole" to "గుంత", "open drain" to "తెరిచిన కాలువ", "manhole" to "మ్యాన్‌హోల్",
+            "curb" to "కాలిబాట అంచు", "speed bump" to "స్పీడ్ బ్రేకర్", "pole" to "స్తంభం", "glass door" to "గాజు తలుపు", "auto rickshaw" to "ఆటో"))
 
     fun t(lang: String, key: String, vararg kv: Pair<String, Any>): String {
         var s = S[lang]?.get(key) ?: S["en"]!![key] ?: key

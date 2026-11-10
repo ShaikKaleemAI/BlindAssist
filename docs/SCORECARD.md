@@ -16,14 +16,13 @@
 | 2 h without overheating | UNVERIFIED | 2 h walk with metrics.csv temp column |
 | Build green | NOT COMPILED LOCALLY | CI run of android-ci.yml |
 
-## Stage status
-- Stage 0: done. Stage 1: done in code, not built.
-- Stage 2: dataset plan + train/export/eval scripts only; no runtime hazard detector. NOT RUN.
-- Stage 1 addendum: replay-from-video (debug-only receiver -> tape) + JVM ReplayRunner + ablation switches implemented, tests written, NOT run; video orientation handling UNVERIFIED.
-- Stage 3 (depth/free space): NOT STARTED (needs a quantized depth model + device).
-- Stage 4: step detector, orientation/roll helper, sway estimator, height-from-walking math = library + unit tests (not run). NOT wired into the service: roll is not applied to frames, sway is not fed to range fusion, no calibration UI. Thresholds ASSUMED.
-- Stage 8 (partial): thermal frame-skipping + spoken hot warning wired in the service (thresholds ASSUMED, UNVERIFIED on device). OEM survival, battery-optimization prompt, crash recovery: NOT STARTED.
-- Stage 5 (partial): text-to-command parser (en/hi/te) + unit tests (not run). No wake word, no speech recognition, no actions wired. Hindi/Telugu phrases NEEDS NATIVE REVIEW.
-- Stage 9 (partial): Python tools for metrics.csv summary, distance benchmark, confusion matrix/per-class recall, ablation plan; 5 Python unit tests PASSED locally (VERIFIED, tooling only; says nothing about the app). Ablation runner = tools/ablation/run_gradle.sh (needs a tape + Gradle; never run). Paper/slides/protocol hold PENDING FIELD DATA.
-- Stage 7 (partial, logic only, NOT wired into the service, tests not run): fall detector, SOS countdown, adaptive verbosity (critical never suppressed; quiet only suggested, never auto-applied), on-device place store, daily summary. NOT implemented: face memory (needs consent UI + biometric-privacy review), caregiver link and SOS delivery (needs SMS/network permission and explicit opt-in), GPS capture, low-battery alerts, UI, persistence. Fall thresholds ASSUMED.
-- Stage 6 (partial, logic only, NOT wired, tests not run): waypoint-route navigator (progress, turn announcements once per threshold, off-route after 3 fixes), straight-line "direction to place" fallback, OCR post-processing (INR note candidates, bus numbers, medicine-label hedging). NOT implemented: ML Kit OCR integration, camera capture for "read this", GPS location source/permission, map data or routing (the app CANNOT plan a route to an arbitrary place offline), Hindi/Telugu nav strings, VLM scene description. GPS accuracy while walking with phone in pocket UNVERIFIED.
+## Stage status (all code NOT COMPILED LOCALLY; Kotlin tests written but never run)
+- Stage 0: done. Stage 1: done in code + replay/ablation (tape, JVM runner, debug-only video->tape receiver).
+- Stage 2: runtime hazard detector implemented (`TfliteHazardDetector`: TFLite INT8 YOLO, CPU default, NNAPI opt-in, `YoloDecoder` + NMS with JVM tests, labels file, hazard classes ranged via ground cue, hi/te labels NEEDS NATIVE REVIEW). No model is trained or shipped, so detection of stairs/potholes/drains/etc. is UNVERIFIED and currently inactive: without `hazard_yolo_int8.tflite` + `hazard_labels.txt` the app uses COCO or limited mode. Stretch-resize vs training letterbox is a known accuracy risk. GPU delegate NOT implemented.
+- Stage 3: free-space/drop-off logic on relative inverse depth (ground-plane fit) + `DepthEstimator` interface, synthetic tests only. NO depth model, NOT wired. Depth is relative, never metric.
+- Stage 4: step detector, orientation/roll, sway estimator, height-from-walk math: library + tests; NOT wired (roll not applied, no calibration UI).
+- Stage 5: command parser + dispatcher (tests). NO wake word, NO speech recognition (needs an on-device engine + model decision, e.g. Vosk), so voice does not work yet.
+- Stage 6: waypoint navigator, direct-bearing fallback, OCR post-processing (unwired); ML Kit OCR (Latin only) wired to earphone "next" button = "read this" (UNVERIFIED on device; MediaSession key mapping differs per headset). No GPS source, no maps/routing, no VLM.
+- Stage 7: fall detector, SOS countdown, adaptive verbosity, place store, daily summary: logic + tests, NOT wired. No face memory, no caregiver link / SOS delivery (needs permissions + opt-in), no persistence/UI.
+- Stage 8: thermal frame-skip + hot warning; wake-lock refresh every 3 h; last-gasp vibration on crash; "stopped unexpectedly last time" notice on next launch; battery-settings button; per-brand hints (Samsung/Xiaomi/Oppo/Vivo). NOT done: auto-restart after crash (Android 12+ blocks camera foreground-service restarts from background), actual OEM testing. All UNVERIFIED on real devices.
+- Stage 9: Python evidence tools (5 tests PASSED locally: tooling only), paper/slides/protocol with PENDING FIELD DATA.
