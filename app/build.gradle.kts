@@ -10,8 +10,9 @@ android {
         applicationId = "com.kaleem.blindassist"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -51,5 +52,8 @@ dependencies {
     implementation(libs.tflite)
     implementation(libs.mlkit.text)
     testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.runner)
 }
 // NOTE: no model is downloaded at build time. Run tools/fetch_models.sh (needs network once).

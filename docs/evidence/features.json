@@ -1,0 +1,15 @@
+{
+  "_note": "Status per feature: none | built | verified. 'verified' needs an 'evidence' path to a file in docs/evidence. Edit honestly: score.py counts built=0.4, verified=1.",
+  "hazard_model":   {"status": "built", "detail": "runtime + decoder exist; no trained model shipped"},
+  "depth_freespace": {"status": "none", "detail": "logic exists; no depth model, not wired"},
+  "voice_commands": {"status": "none", "detail": "wake word + parser exist; no speech engine"},
+  "ocr_read_this":  {"status": "built", "detail": "ML Kit Latin only; earphone next button"},
+  "navigation":     {"status": "none", "detail": "navigator logic exists; no GPS source or trigger"},
+  "saved_places":   {"status": "none", "detail": "store logic only; no UI or persistence"},
+  "fall_alarm":     {"status": "built", "detail": "local alarm only"},
+  "sos_delivery":   {"status": "none", "detail": "no message/call sent"},
+  "face_memory":    {"status": "none", "detail": "not built"},
+  "caregiver_link": {"status": "none", "detail": "not built"},
+  "thermal_oem":    {"status": "built", "detail": "throttle, wake-lock refresh, hints"},
+  "demo_and_selftest": {"status": "built", "detail": "simulated scenarios + readiness check"}
+}
