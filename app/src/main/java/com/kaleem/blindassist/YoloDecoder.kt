@@ -10,10 +10,11 @@ class RawDet(val cls: Int, val score: Float, val box: DoubleArray)
 object YoloDecoder {
     fun decode(out: FloatArray, dim1: Int, dim2: Int, numClasses: Int, scoreThr: Float,
                imgW: Double, imgH: Double, iouThr: Double = 0.5): List<RawDet> {
-        val cf = dim1 < dim2
+        val want = 4 + numClasses
+        require(dim1 == want || dim2 == want) { "unexpected output dims ${dim1}x$dim2 for $numClasses classes" }
+        val cf = dim1 == want                      // channels-first [4+nc, anchors]; decided by class count, not by which dim is smaller
         val n = if (cf) dim2 else dim1
-        val ch = if (cf) dim1 else dim2
-        require(ch == 4 + numClasses) { "unexpected output channels $ch for $numClasses classes" }
+        val ch = want
         require(out.size >= n * ch) { "output buffer too small" }
         fun v(a: Int, c: Int): Float = if (cf) out[c * n + a] else out[a * ch + c]
         val cands = ArrayList<RawDet>()
