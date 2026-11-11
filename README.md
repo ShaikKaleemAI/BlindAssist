@@ -8,3 +8,6 @@ Hindi/Telugu text: NEEDS NATIVE REVIEW. Original README: docs/original/README_or
 
 ## Status snapshot
 Hazard-model runtime, free-space logic, OCR "read this" (earphone next button), thermal/OEM handling exist in code; trained hazard model, depth model, voice recognition, GPS, face memory, SOS delivery do not. See docs/SCORECARD.md. Nothing here has been compiled or field-tested.
+
+## How this project is verified and rated
+Verification is automated, not claimed: `.github/workflows/evidence.yml` builds, runs the unit tests, lint and an emulator smoke test, checks the merged manifest for INTERNET, then `tools/score.py` writes `docs/generated/SCORE.md`. Field evidence files (docs/evidence/README.md) are what raise the scores; nothing is self-assigned.

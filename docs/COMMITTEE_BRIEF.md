@@ -2,6 +2,9 @@
 **One line:** an offline, pocket-worn obstacle-alert assistant for blind pedestrians (English, Hindi, Telugu) that supplements a cane or guide dog and never replaces one.
 **Status in one sentence:** working prototype that builds and passes automated logic tests in CI; NOT yet measured on real streets and NOT tested with blind users.
 
+## Rating method
+Scores are NOT assigned by the author. `tools/score.py` computes them from evidence files (CI results, evaluation JSON, tape-measure CSVs, metrics logs, user-study files). Open `docs/generated/SCORE.md` (also shown in the GitHub Actions run summary of the `evidence` workflow). Any criterion lacking evidence stays low, a 9 needs field evidence, a 10 needs independent replication, and innovation is only scored by 2+ independent reviewers.
+
 ## Honest self-assessment (use this instead of a headline score)
 | Criterion | What we can show live | Evidence | Gap |
 |---|---|---|---|

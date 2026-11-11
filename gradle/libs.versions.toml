@@ -9,7 +9,7 @@ mediapipe = "0.10.14"
 junit = "4.13.2"
 androidxTestExt = "1.2.1"
 androidxTestCore = "1.6.1"
-androidxTestRunner = "1.2.1"
+androidxTestRunner = "1.6.1"
 tflite = "2.14.0"
 mlkitText = "16.0.0"
 

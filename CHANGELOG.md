@@ -1,4 +1,7 @@
 # Changelog
+## 0.4.0 (unreleased)
+- Evidence-driven scoring (tools/score.py), evidence + emulator CI workflow, instrumented smoke tests.
+
 ## 0.3.0 (unreleased)
 - Simulated demo scenarios, on-device readiness check, prototype banner, committee deck and brief.
 

@@ -1,3 +1,5 @@
+> The authoritative rating is generated: docs/generated/SCORE.md (tools/score.py). The tables below are the author's notes and may lag.
+
 # Scorecard (updated each stage). Scores 1-10; no 9/10 without field data.
 | Area | Score | Evidence | Tag |
 |---|---|---|---|
