@@ -16,6 +16,9 @@
 | 2 h without overheating | UNVERIFIED | 2 h walk with metrics.csv temp column |
 | Build green | NOT COMPILED LOCALLY | CI run of android-ci.yml |
 
+## v0.3.0 committee-demo additions (code written; first build of this version NOT yet confirmed in CI)
+Simulated demo scenarios (real pipeline, synthetic detections), on-device readiness check, prototype banner, committee deck (docs/BlindAssist_Committee_Deck.pptx), docs/COMMITTEE_BRIEF.md. A simulation shows behaviour, not accuracy.
+
 ## Stage status (all code NOT COMPILED LOCALLY; Kotlin tests written but never run)
 - Stage 0: done. Stage 1: done in code + replay/ablation (tape, JVM runner, debug-only video->tape receiver).
 - Stage 2 data: open-data pipeline built and its merge/split/report logic unit-tested on MOCK data (15 Python tests PASSED locally, tooling only): ml/open_data/{sources.yaml,fetch_open_data.py,build_dataset.py}, ml/make_report.py, ml/run_all.sh, ml/train_colab.ipynb. Downloads/training/eval NOT run (no network/GPU here); no real dataset size or accuracy exists yet.

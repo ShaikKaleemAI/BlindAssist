@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.0 (unreleased)
+- Simulated demo scenarios, on-device readiness check, prototype banner, committee deck and brief.
+
 ## 0.2.0 (unreleased)
 - Repo restructure, Gradle KTS + version catalog, limited-mode fallback, TTS voice warning, metrics CSV, unit tests, CI.
 - Motion helpers (steps, orientation, sway, height calibration) as tested library; thermal throttling + hot warning.
