@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var status: TextView
     private lateinit var heightEt: EditText
     private lateinit var rg: RadioGroup
+    private var demo: DemoPlayer? = null
+    private var checkSpeech: Speech? = null
     private val langs = listOf("en" to "English", "hi" to "हिन्दी", "te" to "తెలుగు")
 
     private val permLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -35,6 +37,11 @@ class MainActivity : AppCompatActivity() {
         val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40, 60, 40, 40) }
 
         root.addView(TextView(this).apply { text = "Blind Assist"; textSize = 28f })
+        val ver = try { packageManager.getPackageInfo(packageName, 0).versionName } catch (e: Exception) { "?" }
+        root.addView(TextView(this).apply {
+            text = "PROTOTYPE v$ver. Supplements a cane or guide dog, never replaces one. It never says the path is clear."
+            textSize = 13f
+        })
         root.addView(TextView(this).apply {
             text = "Camera height from the ground when the phone is in your pocket (cm). Shirt pocket ≈ 120, trouser pocket ≈ 85."
             textSize = 14f
@@ -70,10 +77,42 @@ class MainActivity : AppCompatActivity() {
             text = "Battery settings (keep running with screen off)"
             setOnClickListener { try { startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) } catch (_: Exception) {} }
         }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        root.addView(Button(this).apply {
+            text = "Run readiness check"
+            setOnClickListener { runCheck() }
+        }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        root.addView(Button(this).apply {
+            text = "Run simulated demo (not live sensing)"
+            setOnClickListener { chooseDemo() }
+        }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         setContentView(root)
     }
 
     override fun onResume() { super.onResume(); refresh() }
+
+    override fun onPause() { super.onPause(); demo?.stop(); demo = null }
+
+    private fun selectedLang() = langs.getOrNull(rg.checkedRadioButtonId - 100)?.first ?: "en"
+
+    private fun runCheck() {
+        val checks = SelfTest.run(this)
+        status.text = SelfTestReport.text(checks)
+        checkSpeech?.shutdown()
+        val sp = Speech(this, "en").also { checkSpeech = it }
+        sp.say(SelfTestReport.spoken(checks), P_ANSWER, 60.0, "selftest")
+        btn.postDelayed({ if (checkSpeech === sp) { sp.shutdown(); checkSpeech = null } }, 40_000)
+    }
+
+    private fun chooseDemo() {
+        if (AssistService.running) { status.text = "Stop the assistant before running a simulated demo."; return }
+        val list = DemoScenarios.all()
+        android.app.AlertDialog.Builder(this).setTitle("Simulated scenario")
+            .setItems(list.map { it.title }.toTypedArray()) { _, i ->
+                demo?.stop()
+                status.text = "Playing simulated scenario: ${list[i].title}. Not live sensing."
+                demo = DemoPlayer(this, selectedLang()) { status.text = "Simulation finished." }.also { it.play(list[i]) }
+            }.show()
+    }
 
     private fun refresh() {
         val on = AssistService.running
